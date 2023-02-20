@@ -1,22 +1,66 @@
-// import mongoose from "mongoose";
-// const Schema = mongoose.Schema;
-// const userSchema = new Schema({
-//   email: {
-//     type: String,
-//     required: true,
-//   },
-//   password: {
-//     type: String,
-//     required: true,
-//   },
-//   resetToken: {
-//     type: String,
-//   },
-//   resetTokenExpiration: {
-//     type: Date,
-//   },
-// });
+import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
+import { BASE_URI, POST_OPTIONS } from "../helpers/database.ts";
 
-// const User = mongoose.model("User", userSchema);
+interface RequestBody {
+  dataSource: string;
+  database: string;
+  collection: string;
+  document?: Record<string, unknown>;
+}
 
-// export default User;
+const env = await load();
+const {
+  COLLECTION,
+  DATABASE,
+  DATA_SOURCE,
+} = env;
+
+const requestBody: RequestBody = {
+  dataSource: DATA_SOURCE,
+  database: DATABASE,
+  collection: "users",
+};
+
+export class User {
+  email: string;
+  password: string;
+
+  constructor(email: string, password: string) {
+    this.email = email;
+    this.password = password;
+  }
+
+  async save() {
+    try {
+      const URI = `${BASE_URI}/action/insertOne`;
+
+      POST_OPTIONS.body = JSON.stringify({
+        ...requestBody,
+        document: {
+          email: this.email,
+          password: this.password,
+        },
+      });
+
+      const dataResponse = await fetch(URI, POST_OPTIONS);
+      const insertedId = await dataResponse.json();
+
+      return {
+        status: 201,
+        body: {
+          success: true,
+          data: {
+            insertedId: insertedId,
+            email: this.email,
+            password: this.password,
+          },
+        },
+      };
+    } catch (error) {
+      return {
+        success: false,
+        msg: error.toString(),
+      };
+    }
+  }
+}

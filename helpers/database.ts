@@ -8,7 +8,7 @@ const {
 export const BASE_URI =
   `https://ap-southeast-1.aws.data.mongodb-api.com/app/${APP_ID}/endpoint/data/v1`;
 
-export const options = {
+export const POST_OPTIONS = {
   method: "POST",
   headers: {
     "Content-Type": "application/json",

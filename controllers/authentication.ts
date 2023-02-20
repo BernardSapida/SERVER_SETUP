@@ -1,12 +1,18 @@
-// import User from "../models/User.ts";
-// import bcrypt from "bcryptjs";
-// import nodemailer from "nodemailer";
-// import crypto from "crypto";
-// import { validationResult } from "express-validator";
+import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
+import * as bcrypt from "https://deno.land/x/bcrypt@v0.3.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp/mod.ts";
 
-// const getSignin = (req: any, res: any, next: any) => {
-//   res.send({ message: "You are in Signin" });
-// };
+import { User } from "../models/User.ts";
+import { signupValidation } from "../helpers/validations/signup.ts";
+// import crypto from "crypto";
+// import User from "../models/User.ts";
+
+const env = await load();
+const {
+  COLLECTION,
+  DATABASE,
+  DATA_SOURCE,
+} = env;
 
 // const postSignin = async (req: any, res: any, next: any) => {
 //   const { email, password } = req.body;
@@ -97,38 +103,31 @@
 //   }
 // };
 
-// const postSignup = async (req: any, res: any, next: any) => {
-//   const { email, password, confirmPassword } = req.body;
-//   const validationResults = validationResult(req);
+export const postSignup = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  const body = await request.body();
+  const data = await body.value;
+  const { email, password, confirmPassword } = data;
 
-//   if (!validationResults.isEmpty()) {
-//     const error: string = validationResults.array()[0].msg;
+  const [passes, errors] = await signupValidation(data);
 
-//     return res.status(403).send({
-//       email: email,
-//       password: password,
-//       confirmPassword: confirmPassword,
-//       error: error,
-//     });
-//   }
+  if (!passes) {
+    return response.body = {
+      success: false,
+      errors: errors,
+    };
+  }
 
-//   const hashedPassword = await bcrypt.hash(password, 12);
-//   const newUser = new User({
-//     email: email.toLowerCase(),
-//     password: hashedPassword,
-//     cart: { items: [] },
-//   });
-
-//   newUser.save();
-//   res.send({ message: "Successfully signup!" });
-
-//   sendMail(
-//     email,
-//     "Account successfully created!",
-//     "Account successfully created!",
-//     "<p>Account successfully created!</p>",
-//   );
-// };
+  const hashedPassword = await bcrypt.hash(password);
+  const newUser = new User(email.toLowerCase(), hashedPassword);
+  console.log(await newUser.save());
+  response.body = { success: true, message: "Successfully signup!" };
+};
 
 // const postSignout = async (req: any, res: any, next: any) => {
 //   res.send({ message: "You are signed out" });
@@ -161,13 +160,4 @@
 //   };
 
 //   // mailTransporter.sendMail(data);
-// };
-
-// export default {
-//   getSignin,
-//   postSignin,
-//   postResetPassword,
-//   postUpdatePassword,
-//   postSignup,
-//   postSignout,
 // };

@@ -12,11 +12,14 @@ interface Message {
 
 let messages: Array<Message> = [];
 
-connect();
+await connect();
 
 router.get("/", async (context) => {
-  context.response.body = await getDatabase().collection("users").find()
-    .toArray();
+  const data = await getDatabase().collection("users").find().toArray();
+
+  context.response.body = {
+    data: data,
+  };
 });
 
 router.get("/contact", (context) => {
@@ -72,4 +75,4 @@ app.use(oakCors(
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-app.listen({ port: 3000 });
+await app.listen({ port: 3000 });

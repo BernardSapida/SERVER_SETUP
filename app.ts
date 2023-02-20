@@ -1,65 +1,8 @@
 import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { connect, getDatabase } from "./helpers/database.ts";
+import route from "./routes/authentication.ts";
 
 const app = new Application();
-const router = new Router();
-
-interface Message {
-  id: string;
-  text: string;
-}
-
-let messages: Array<Message> = [];
-
-await connect();
-
-router.get("/", async (context) => {
-  const data = await getDatabase().collection("users").find().toArray();
-
-  context.response.body = {
-    data: data,
-  };
-});
-
-router.get("/contact", (context) => {
-  context.response.body = {
-    message: messages,
-  };
-});
-
-router.post("/contact", async (context) => {
-  const data = await context.request.body();
-  const value = await data.value;
-
-  const newMessage: Message = {
-    id: new Date().toISOString(),
-    text: value.text,
-  };
-
-  messages.push(newMessage);
-
-  context.response.body = { message: "Sent message!", messages: messages };
-});
-
-router.put("/contact/:id", async (context) => {
-  const id = context.params.id;
-  const data = await context.request.body();
-  const value = await data.value;
-  const messageIdx = messages.findIndex((message) => message.id === id);
-
-  messages[messageIdx] = { id: messages[messageIdx].id, text: value.text };
-
-  context.response.body = { message: "Updated message!", messages: messages };
-});
-
-router.delete("/contact/:id", (context) => {
-  const id = context.params.id;
-  const newMessage = messages.filter((message) => message.id !== id);
-  messages = newMessage;
-
-  context.response.body = { message: "Deleted message!", messages: messages };
-});
 
 app.use(oakCors(
   {
@@ -73,6 +16,6 @@ app.use(oakCors(
   },
 ));
 
-app.use(router.routes());
-app.use(router.allowedMethods());
+app.use(route.routes());
+app.use(route.allowedMethods());
 await app.listen({ port: 3000 });

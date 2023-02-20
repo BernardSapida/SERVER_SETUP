@@ -1,21 +1,18 @@
-import {
-  Database,
-  MongoClient,
-} from "https://deno.land/x/mongo@v0.31.1/mod.ts";
-import { load } from "https://deno.land/std/dotenv/mod.ts";
-
-let database: Database;
+import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 const env = await load();
-const { DATA_SOURCE, DATABASE_PASSWORD, DB_CLUSTER_URL, DATABASE_NAME } = env;
+const {
+  APP_ID,
+  DATA_API_KEY,
+} = env;
 
-export async function connect() {
-  const client = new MongoClient();
-  await client.connect(
-    `mongodb+srv://${DATA_SOURCE}:${DATABASE_PASSWORD}@${DB_CLUSTER_URL}/${DATABASE_NAME}?authMechanism=SCRAM-SHA-1`,
-  );
-  database = client.database("shop");
-}
+export const BASE_URI =
+  `https://ap-southeast-1.aws.data.mongodb-api.com/app/${APP_ID}/endpoint/data/v1`;
 
-export function getDatabase() {
-  return database;
-}
+export const options = {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": DATA_API_KEY,
+  },
+  body: "",
+};

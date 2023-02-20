@@ -1,6 +1,6 @@
 import { Application, Router } from "https://deno.land/x/oak@v11.1.0/mod.ts";
 import { oakCors } from "https://deno.land/x/cors@v1.2.2/mod.ts";
-import { connect } from "./helpers/database.ts";
+import { connect, getDatabase } from "./helpers/database.ts";
 
 const app = new Application();
 const router = new Router();
@@ -15,6 +15,7 @@ let messages: Array<Message> = [];
 connect();
 
 router.get("/", (context) => {
+  console.log(getDatabase().collection("users").find().toArray());
   context.response.body = `<!DOCTYPE html>
         <html>
         <head><title>Hello world!</title><head>

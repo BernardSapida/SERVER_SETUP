@@ -15,15 +15,8 @@ let messages: Array<Message> = [];
 connect();
 
 router.get("/", async (context) => {
-  console.log(await getDatabase().collection("users").find().toArray());
-  context.response.body = `<!DOCTYPE html>
-        <html>
-        <head><title>Hello world!</title><head>
-        <body>
-            <h1>Hello world!</h1>
-        </body>
-        </html>
-    `;
+  context.response.body = await getDatabase().collection("users").find()
+    .toArray();
 });
 
 router.get("/contact", (context) => {

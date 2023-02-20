@@ -13,8 +13,7 @@ export async function connect() {
   await client.connect(
     `mongodb+srv://${DATA_SOURCE}:${DATABASE_PASSWORD}@${DB_CLUSTER_URL}/${DATABASE_NAME}?authMechanism=SCRAM-SHA-1`,
   );
-  database = client.database("test");
-  console.log("connected");
+  database = client.database("shop");
 }
 
 export function getDatabase() {

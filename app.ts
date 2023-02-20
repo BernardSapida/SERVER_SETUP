@@ -12,6 +12,8 @@ interface Message {
 
 let messages: Array<Message> = [];
 
+connect();
+
 router.get("/", (context) => {
   context.response.body = `<!DOCTYPE html>
         <html>
@@ -76,5 +78,4 @@ app.use(oakCors(
 
 app.use(router.routes());
 app.use(router.allowedMethods());
-
-connect().then(() => app.listen({ port: 3000 }));
+app.listen({ port: 3000 });

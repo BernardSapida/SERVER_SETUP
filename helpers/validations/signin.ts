@@ -23,7 +23,7 @@ export function emailExist(
     const foundEmail = result.data.documents.length != 0;
 
     if (!foundEmail) {
-      return invalid("error_email");
+      return invalid("validEmail");
     }
   };
 }
@@ -35,12 +35,12 @@ export function validPassword(
   return async function uniqueRule(): Promise<Validity> {
     const result = await find("users", { email: email });
 
-    if (result.data.documents.length == 0) return invalid("error_password");
+    if (result.data.documents.length == 0) return invalid("validPassword");
 
     const hashPassword = result.data.documents[0].password;
     const passwordMatched = verify(password, hashPassword);
 
-    if (!passwordMatched) return invalid("error_password");
+    if (!passwordMatched) return invalid("validPassword");
   };
 }
 
@@ -56,8 +56,8 @@ export const signinValidation = async (
     ],
   }, {
     messages: {
-      error_email: "The email address didn't exist!",
-      error_password: "Password is incorrect!",
+      validEmail: "The email address didn't exist!",
+      validPassword: "Password is incorrect!",
     },
   });
 };

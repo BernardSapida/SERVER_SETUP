@@ -179,19 +179,6 @@ export const postResetPassword = async (context: any) => {
   }
 };
 
-const validToken = async (token: string) => {
-  const result = await find(
-    "users",
-    {
-      resetToken: token,
-      resetTokenExpiration: { $gte: Date.now() },
-    },
-  );
-
-  if (result.data.documents.length == 0) return false;
-  return true;
-};
-
 export const updatePassword = async ({
   request,
   response,
@@ -270,4 +257,17 @@ export const postSignup = async ({
       message: error.toString(),
     };
   }
+};
+
+const validToken = async (token: string) => {
+  const result = await find(
+    "users",
+    {
+      resetToken: token,
+      resetTokenExpiration: { $gte: Date.now() },
+    },
+  );
+
+  if (result.data.documents.length == 0) return false;
+  return true;
 };

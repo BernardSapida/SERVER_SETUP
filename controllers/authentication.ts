@@ -134,14 +134,14 @@ export const postSignup = async ({
     const data = await body.value;
     const { email, password } = data;
 
-    // const [passes, errors] = await signupValidation(data);
+    const [passes, errors] = await signupValidation(data);
 
-    // if (!passes) {
-    //   return response.body = {
-    //     success: false,
-    //     errors: errors,
-    //   };
-    // }
+    if (!passes) {
+      return response.body = {
+        success: false,
+        errors: errors,
+      };
+    }
 
     const hashedPassword = await bcrypt.hash(password);
     const newUser = new User(email.toLowerCase(), hashedPassword);

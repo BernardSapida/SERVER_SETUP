@@ -28,7 +28,7 @@ export class User {
 
       const insertedId = await result.data;
 
-      await sendMail(
+      sendMail(
         this.email,
         "Account Signup",
         "Account successfully signed up",

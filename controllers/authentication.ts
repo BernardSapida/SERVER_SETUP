@@ -4,8 +4,10 @@ import { User } from "../models/User.ts";
 import { signinValidation } from "../helpers/validations/signin.ts";
 import { signupValidation } from "../helpers/validations/signup.ts";
 import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
+import { resetPasswordValidation } from "../helpers/validations/resetPassword.ts";
 
 import { fetchApi } from "../helpers/database.ts";
+import { sendMail } from "../helpers/mail/mail.ts";
 
 // import crypto from "crypto";
 
@@ -31,39 +33,63 @@ export const postSignin = async ({
   response.body = { success: true, message: "Successfully logged in!" };
 };
 
-// const postResetPassword = (req: any, res: any, next: any) => {
-//   const { email } = req.body;
+export const resetPassword = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  try {
+    const body = await request.body();
+    const data = await body.value;
+    const { email } = data;
+    const token =
+      "c2NyeXB0AA4AAAAIAAAAAQjC3U55XwYyGXRnPN0xZ65k3inzgvtPIwOUMJ8RmhEKKXg+DqgzZScmzAkudOwXpFW9/DhGfGoJmK/wGG3c/ROR9PZ1hYivLdNwZyRf1qIj";
 
-//   crypto.randomBytes(32, async (error, buffer) => {
-//     if (error) {
-//       console.error(error);
-//       return res.redirect("/reset-password");
-//     }
+    const [passes, errors] = await resetPasswordValidation(data);
 
-//     const token = buffer.toString("hex");
-//     const user = await User.findOne({ email: email });
+    if (!passes) {
+      return response.body = {
+        success: false,
+        errors: errors,
+      };
+    }
 
-//     if (!user) {
-//       req.flash("error", "Email didn't exist!");
-//       return res.redirect("/reset-password");
-//     }
+    const bodyInformation = {
+      filter: { email: email },
+      update: {
+        "$set": {
+          resetToken: token,
+          resetTokenExpiration: Date.now() + 3600000,
+        },
+      },
+    };
 
-//     user.resetToken = token;
-//     user.resetTokenExpiration = Date.now() + 3600000;
-//     await user.save();
-//     res.redirect("/");
+    await fetchApi("POST", "updateOne", "users", bodyInformation);
 
-//     // sendMail(
-//     //     email,
-//     //     'Reset Password',
-//     //     'Reset Password',
-//     //     `
-//     //         <p>You requested a password reset.</p>
-//     //         <p>Click this <a href="http://localhost:3000/reset-password/${token}">link</a> to set a new password.</p>
-//     //     `
-//     // );
-//   });
-// };
+    response.body = {
+      success: true,
+      message: "Successfully sent a reset password link in your email!",
+    };
+
+    // send email
+    sendMail(
+      email,
+      "Account Reset Password Link",
+      "Reset Password",
+      `
+      <h1>Reset Password</h1>
+      <p>Click <a href="http://localhost:3000/reset-password/${token}">here</a> to reset your password.</p>
+      `,
+    );
+  } catch (error) {
+    response.body = {
+      success: false,
+      message: error.toString(),
+    };
+  }
+};
 
 export const updatePassword = async ({
   request,
@@ -132,6 +158,7 @@ export const postSignup = async ({
         errors: errors,
       };
     }
+
     const hashedPassword = hash(password);
     const newUser = new User(email.toLowerCase(), hashedPassword);
 

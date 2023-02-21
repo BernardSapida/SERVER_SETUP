@@ -3,6 +3,7 @@ import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 import {
   postSignin,
   postSignup,
+  resetPassword,
   updatePassword,
 } from "../controllers/authentication.ts";
 
@@ -51,7 +52,7 @@ const router = new Router();
 
 router.post("/signin", postSignin);
 
-// router.post("/reset-password", AuthController.postResetPassword);
+router.post("/reset-password", resetPassword);
 
 router.post("/update-password", updatePassword);
 

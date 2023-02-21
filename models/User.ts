@@ -28,12 +28,12 @@ export class User {
 
       const insertedId = await result.data;
 
-      // sendMail(
-      //   this.email,
-      //   "Account Signup",
-      //   "Account successfully signed up",
-      //   "<h1>Account successfully signed up!</h1>",
-      // );
+      sendMail(
+        this.email,
+        "Account Signup",
+        "Account successfully signed up",
+        "<h1>Account successfully signed up!</h1>",
+      );
 
       return response(true, insertedId);
     } catch (error) {

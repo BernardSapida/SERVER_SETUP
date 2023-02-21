@@ -1,4 +1,3 @@
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
 import { hash } from "https://deno.land/x/scrypt@v4.2.1/mod.ts";
 import { User } from "../models/User.ts";
 
@@ -7,11 +6,8 @@ import { signupValidation } from "../helpers/validations/signup.ts";
 import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
 
 import { fetchApi } from "../helpers/database.ts";
-import { find } from "../helpers/databaseMethods.ts";
 
 // import crypto from "crypto";
-
-const test: Array<number | string> = [];
 
 export const postSignin = async ({
   request,
@@ -91,7 +87,7 @@ export const updatePassword = async ({
       };
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword);
+    const hashedPassword = hash(newPassword);
 
     const bodyInformation = {
       filter: {
@@ -136,17 +132,13 @@ export const postSignup = async ({
         errors: errors,
       };
     }
-    // const hashedPassword = await bcrypt.hash(password);
     const hashedPassword = hash(password);
-    test.push("hashedPassword");
-    test.push(hashedPassword);
     const newUser = new User(email.toLowerCase(), hashedPassword);
 
     await newUser.save();
     response.body = { success: true, message: "Successfully signup!" };
   } catch (error) {
     response.body = {
-      test: test,
       success: false,
       message: error.toString(),
     };

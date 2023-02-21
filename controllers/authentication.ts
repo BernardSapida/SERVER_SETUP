@@ -12,6 +12,8 @@ import { find } from "../helpers/databaseMethods.ts";
 
 // import crypto from "crypto";
 
+const test: Array<number> = [];
+
 const env = await load();
 const {
   COLLECTION,
@@ -134,22 +136,27 @@ export const postSignup = async ({
     const data = await body.value;
     const { email, password } = data;
 
+    test.push(1);
     const [passes, errors] = await signupValidation(data);
 
+    test.push(2);
     if (!passes) {
       return response.body = {
         success: false,
         errors: errors,
       };
     }
-
+    test.push(3);
     const hashedPassword = await bcrypt.hash(password);
     const newUser = new User(email.toLowerCase(), hashedPassword);
+    test.push(4);
 
     await newUser.save();
+    test.push(5);
     response.body = { success: true, message: "Successfully signup!" };
   } catch (error) {
     response.body = {
+      test: test,
       success: false,
       message: error.toString(),
     };

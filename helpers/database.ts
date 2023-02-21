@@ -7,6 +7,9 @@ const {
   DATA_SOURCE,
 } = env;
 
+const BASE_URI =
+  `https://ap-southeast-1.aws.data.mongodb-api.com/app/${APP_ID}/endpoint/data/v1`;
+
 export const fetchApi = async (
   method: string,
   action: string,
@@ -14,19 +17,16 @@ export const fetchApi = async (
   options: Record<string, unknown>,
 ) => {
   try {
-    const BASE_URI = `https://ap-southeast-1.aws.data.mongodb-api.com/app/${
-      Deno.env.get("APP_ID")
-    }/endpoint/data/v1`;
     const URI = `${BASE_URI}/action/${action}`;
     const POST_OPTIONS = {
       method: method,
       headers: {
         "Content-Type": "application/json",
-        "api-key": Deno.env.get("DATA_API_KEY")!,
+        "api-key": DATA_API_KEY,
       },
       body: JSON.stringify({
-        dataSource: Deno.env.get("DATA_SOURCE"),
-        database: Deno.env.get("DATABASE"),
+        dataSource: DATA_SOURCE,
+        database: DATABASE,
         collection: collection,
         ...options,
       }),

@@ -31,7 +31,6 @@ export function notEmailExist(
 ): Rule {
   return async function uniqueRule(): Promise<Validity> {
     const findEmail = await find("users", { email: email });
-    console.log(findEmail);
 
     if (findEmail.data.documents.length > 0) {
       return invalid("error_email");

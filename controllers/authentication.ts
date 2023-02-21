@@ -128,25 +128,20 @@ export const postSignup = async ({
     const data = await body.value;
     const { email, password } = data;
 
-    test.push(1);
     const [passes, errors] = await signupValidation(data);
 
-    test.push(2);
     if (!passes) {
       return response.body = {
         success: false,
         errors: errors,
       };
     }
-    test.push(3);
     const hashedPassword = await bcrypt.hash(password);
+    test.push("hashedPassword");
     test.push(hashedPassword);
-    test.push(4);
     const newUser = new User(email.toLowerCase(), hashedPassword);
-    test.push(5);
 
     await newUser.save();
-    test.push(6);
     response.body = { success: true, message: "Successfully signup!" };
   } catch (error) {
     response.body = {

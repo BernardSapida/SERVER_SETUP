@@ -8,6 +8,7 @@ import {
   validate,
   Validity,
 } from "https://deno.land/x/validasaur/mod.ts";
+import { verify } from "https://deno.land/x/scrypt@v4.2.1/mod.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.3.0/mod.ts";
 
 interface ValidateCredential {
@@ -38,7 +39,8 @@ export function validPassword(
     if (result.data.documents.length == 0) return invalid("error_password");
 
     const hashPassword = result.data.documents[0].password;
-    const passwordMatched = await bcrypt.compare(password, hashPassword);
+    // const passwordMatched = await bcrypt.compare(password, hashPassword);
+    const passwordMatched = verify(password, hashPassword);
 
     if (!passwordMatched) return invalid("error_password");
   };

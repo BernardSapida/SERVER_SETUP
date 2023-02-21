@@ -5,9 +5,11 @@ import { signinValidation } from "../helpers/validations/signin.ts";
 import { signupValidation } from "../helpers/validations/signup.ts";
 import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
 import { resetPasswordValidation } from "../helpers/validations/resetPassword.ts";
+import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 
-import { fetchApi } from "../helpers/database.ts";
+import { MongoAPI } from "../helpers/database.ts";
 import { sendMail } from "../helpers/mail/mail.ts";
+import { find } from "../helpers/databaseMethods.ts";
 
 // import crypto from "crypto";
 
@@ -33,7 +35,7 @@ export const postSignin = async ({
   response.body = { success: true, message: "Successfully logged in!" };
 };
 
-export const postResetPassword = async ({
+export const requestResetPassword = async ({
   request,
   response,
 }: {
@@ -45,7 +47,7 @@ export const postResetPassword = async ({
     const data = await body.value;
     const { email } = data;
     const token =
-      "c2NyeXB0AA4AAAAIAAAAAQjC3U55XwYyGXRnPN0xZ65k3inzgvtPIwOUMJ8RmhEKKXg+DqgzZScmzAkudOwXpFW9/DhGfGoJmK/wGG3c/ROR9PZ1hYivLdNwZyRf1qIj";
+      "c2NyeXB0AA4AOxA219746sKQjC3U55XwYyGXRnPN0xZ65k3inzgvtPIwOUMJ8RmhEKKXgDqgzZScmzAkudOwXpFW9";
 
     const [passes, errors] = await resetPasswordValidation(data);
 
@@ -59,15 +61,19 @@ export const postResetPassword = async ({
     const bodyInformation = {
       filter: { email: email },
       update: {
-        "$set": {
+        $set: {
           resetToken: token,
           resetTokenExpiration: Date.now() + 3600000,
         },
       },
     };
 
-    await fetchApi("POST", "updateOne", "users", bodyInformation);
-
+    await MongoAPI(
+      "POST",
+      "updateOne",
+      "users",
+      bodyInformation,
+    );
     response.body = {
       success: true,
       message: "Successfully sent a reset password link in your email!",
@@ -91,19 +97,99 @@ export const postResetPassword = async ({
   }
 };
 
-export const resetPassword = async ({
-  request,
-  response,
-}: {
-  request: any;
-  response: any;
-}) => {
-  console.log("HERE:");
-  const token = await request.params.token;
-  response.body = {
-    success: true,
-    message: token,
-  };
+export const resetPassword = async (context: any) => {
+  const { response } = context;
+
+  try {
+    const token = await context.params.token;
+    const tokenValid = await validToken(token);
+
+    if (!tokenValid) {
+      throw new Error("The token is invalid!");
+    }
+
+    context.response.body = {
+      success: true,
+      token: token,
+    };
+  } catch (error) {
+    response.body = {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+export const postResetPassword = async (context: any) => {
+  const { request, response } = context;
+
+  try {
+    const token = await context.params.token;
+    const body = await request.body();
+    const data = await body.value;
+    const { newPassword } = data;
+    const tokenValid = await validToken(token);
+
+    if (!tokenValid) {
+      throw new Error("The token is invalid!");
+    }
+
+    const [passes, errors] = await updatePasswordValidation(data);
+
+    if (!passes) {
+      return response.body = {
+        status: 403,
+        success: false,
+        errors: errors,
+      };
+    }
+
+    const hashedPassword = hash(newPassword);
+
+    const bodyInformation = {
+      filter: {
+        resetToken: token,
+        resetTokenExpiration: { $gte: Date.now() },
+      },
+      update: {
+        $unset: {
+          resetToken: "",
+          resetTokenExpiration: "",
+        },
+        $set: { password: hashedPassword },
+      },
+    };
+
+    await MongoAPI(
+      "POST",
+      "updateOne",
+      "users",
+      bodyInformation,
+    );
+
+    context.response.body = {
+      success: true,
+      message: "Password updated successfully!",
+    };
+  } catch (error) {
+    response.body = {
+      success: false,
+      message: error.message,
+    };
+  }
+};
+
+const validToken = async (token: string) => {
+  const result = await find(
+    "users",
+    {
+      resetToken: token,
+      resetTokenExpiration: { $gte: Date.now() },
+    },
+  );
+
+  if (result.data.documents.length == 0) return false;
+  return true;
 };
 
 export const updatePassword = async ({
@@ -116,8 +202,8 @@ export const updatePassword = async ({
   try {
     const body = await request.body();
     const data = await body.value;
-    const { newPassword, passwordToken } = data;
-    const userId = "63f442b288d4013bd7aa6445";
+    const { newPassword } = data;
+    const userId = "63f46ddd88d4013bd7b5d5ea";
 
     const [passes, errors] = await updatePasswordValidation(data);
 
@@ -129,17 +215,16 @@ export const updatePassword = async ({
     }
 
     const hashedPassword = hash(newPassword);
-
     const bodyInformation = {
       filter: {
         "_id": { $oid: userId },
       },
       update: {
-        "$set": { password: hashedPassword },
+        $set: { password: hashedPassword },
       },
     };
 
-    await fetchApi("POST", "updateOne", "users", bodyInformation);
+    await MongoAPI("POST", "updateOne", "users", bodyInformation);
 
     response.body = {
       success: true,

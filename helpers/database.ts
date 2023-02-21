@@ -10,7 +10,7 @@ const {
 const BASE_URI =
   `https://ap-southeast-1.aws.data.mongodb-api.com/app/${APP_ID}/endpoint/data/v1`;
 
-export const fetchApi = async (
+export const MongoAPI = async (
   method: string,
   action: string,
   collection: string,

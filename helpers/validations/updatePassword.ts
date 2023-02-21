@@ -18,7 +18,7 @@ export function isPasswordMatched(
 ): Rule {
   return function uniqueRule() {
     if (password !== confirmPassword) {
-      return invalid("error_confirm_password");
+      return invalid("isPasswordMatched");
     }
   };
 }
@@ -34,8 +34,9 @@ export const updatePasswordValidation = async (
     ],
   }, {
     messages: {
-      error_confirm_password:
-        "New password and confirm password didn't matched!",
+      required: "All field is required",
+      minLength: "Password must be at least 12 characters long",
+      isPasswordMatched: "New password and confirm password didn't matched",
     },
   });
 };

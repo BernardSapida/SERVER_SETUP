@@ -4,56 +4,20 @@ import {
   postResetPassword,
   postSignin,
   postSignup,
+  requestResetPassword,
   resetPassword,
   updatePassword,
 } from "../controllers/authentication.ts";
 
 const router = new Router();
 
-// router.get("/contact", (context) => {
-//   context.response.body = {
-//     message: messages,
-//   };
-// });
-
-// router.post("/contact", async (context) => {
-//   const data = await context.request.body();
-//   const value = await data.value;
-
-//   const newMessage: Message = {
-//     id: new Date().toISOString(),
-//     text: value.text,
-//   };
-
-//   messages.push(newMessage);
-
-//   context.response.body = { message: "Sent message!", messages: messages };
-// });
-
-// router.put("/contact/:id", async (context) => {
-//   const id = context.params.id;
-//   const data = await context.request.body();
-//   const value = await data.value;
-//   const messageIdx = messages.findIndex((message) => message.id === id);
-
-//   messages[messageIdx] = { id: messages[messageIdx].id, text: value.text };
-
-//   context.response.body = { message: "Updated message!", messages: messages };
-// });
-
-// router.delete("/contact/:id", (context) => {
-//   const id = context.params.id;
-//   const newMessage = messages.filter((message) => message.id !== id);
-//   messages = newMessage;
-
-//   context.response.body = { message: "Deleted message!", messages: messages };
-// });
-
 router.post("/signin", postSignin);
 
-router.post("/reset-password", postResetPassword);
+router.post("/reset-password", requestResetPassword);
 
 router.get("/reset-password/:token", resetPassword);
+
+router.post("/reset-password/:token", postResetPassword);
 
 router.post("/update-password", updatePassword);
 

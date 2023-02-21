@@ -1,4 +1,4 @@
-import { fetchApi } from "../helpers/database.ts";
+import { MongoAPI } from "../helpers/database.ts";
 import { response } from "../helpers/databaseMethods.ts";
 import { sendMail } from "../helpers/mail/mail.ts";
 
@@ -20,7 +20,7 @@ export class User {
         },
       };
 
-      const result = await fetchApi("POST", "insertOne", "users", document);
+      const result = await MongoAPI("POST", "insertOne", "users", document);
 
       if (result.status === 403) {
         return response(false, result.data);

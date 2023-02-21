@@ -1,4 +1,4 @@
-import { fetchApi } from "./database.ts";
+import { MongoAPI } from "./database.ts";
 
 export const find = async (
   collection: string,
@@ -10,7 +10,7 @@ export const find = async (
         ...options,
       },
     };
-    const response = await fetchApi("POST", "find", collection, filter);
+    const response = await MongoAPI("POST", "find", collection, filter);
 
     if (response.status === 403) {
       return response;

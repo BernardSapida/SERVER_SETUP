@@ -1,16 +1,16 @@
 import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.3.0/mod.ts";
-import { SmtpClient } from "https://deno.land/x/smtp/mod.ts";
 
 import { User } from "../models/User.ts";
+
 import { signinValidation } from "../helpers/validations/signin.ts";
 import { signupValidation } from "../helpers/validations/signup.ts";
 import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
-import { find } from "../helpers/databaseMethods.ts";
+
 import { fetchApi } from "../helpers/database.ts";
+import { find } from "../helpers/databaseMethods.ts";
 
 // import crypto from "crypto";
-// import User from "../models/User.ts";
 
 const env = await load();
 const {
@@ -82,34 +82,44 @@ export const updatePassword = async ({
   request: any;
   response: any;
 }) => {
-  const body = await request.body();
-  const data = await body.value;
-  const { newPassword, passwordToken } = data;
-  const userId = "63f442b288d4013bd7aa6445";
+  try {
+    const body = await request.body();
+    const data = await body.value;
+    const { newPassword, passwordToken } = data;
+    const userId = "63f442b288d4013bd7aa6445";
 
-  const [passes, errors] = await updatePasswordValidation(data);
+    const [passes, errors] = await updatePasswordValidation(data);
 
-  if (!passes) {
-    return response.body = {
+    if (!passes) {
+      return response.body = {
+        success: false,
+        errors: errors,
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword);
+
+    const bodyInformation = {
+      filter: {
+        "_id": { $oid: userId },
+      },
+      update: {
+        "$set": { password: hashedPassword },
+      },
+    };
+
+    await fetchApi("POST", "updateOne", "users", bodyInformation);
+
+    response.body = {
+      success: true,
+      message: "Successfully updated password!",
+    };
+  } catch (error) {
+    response.body = {
       success: false,
-      errors: errors,
+      message: error.toString(),
     };
   }
-
-  const hashedPassword = await bcrypt.hash(newPassword);
-
-  const bodyInformation = {
-    filter: { "_id": userId },
-    update: {
-      "$set": { password: hashedPassword },
-    },
-  };
-
-  const result = await fetchApi("POST", "updateOne", "users", bodyInformation);
-
-  console.log(await result);
-
-  response.body = { success: true, message: "Successfully updated password!" };
 };
 
 export const postSignup = async ({
@@ -119,25 +129,31 @@ export const postSignup = async ({
   request: any;
   response: any;
 }) => {
-  const body = await request.body();
-  const data = await body.value;
-  const { email, password } = data;
+  try {
+    const body = await request.body();
+    const data = await body.value;
+    const { email, password } = data;
 
-  const [passes, errors] = await signupValidation(data);
+    const [passes, errors] = await signupValidation(data);
 
-  if (!passes) {
-    return response.body = {
+    if (!passes) {
+      return response.body = {
+        success: false,
+        errors: errors,
+      };
+    }
+
+    const hashedPassword = await bcrypt.hash(password);
+    const newUser = new User(email.toLowerCase(), hashedPassword);
+
+    await newUser.save();
+    response.body = { success: true, message: "Successfully signup!" };
+  } catch (error) {
+    response.body = {
       success: false,
-      errors: errors,
+      message: error.toString(),
     };
   }
-
-  const hashedPassword = await bcrypt.hash(password);
-  const newUser = new User(email.toLowerCase(), hashedPassword);
-
-  await newUser.save();
-
-  response.body = { success: true, message: "Successfully signup!" };
 };
 
 // const postSignout = async (req: any, res: any, next: any) => {

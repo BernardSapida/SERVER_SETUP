@@ -1,5 +1,6 @@
 import { fetchApi } from "../helpers/database.ts";
 import { response } from "../helpers/databaseMethods.ts";
+import { sendMail } from "../helpers/mail/mail.ts";
 
 export class User {
   email: string;
@@ -26,6 +27,13 @@ export class User {
       }
 
       const insertedId = await result.data;
+
+      sendMail(
+        this.email,
+        "Account Signup",
+        "Account successfully signed up",
+        "<h1>Account successfully signed up!</h1>",
+      );
 
       return response(true, insertedId);
     } catch (error) {

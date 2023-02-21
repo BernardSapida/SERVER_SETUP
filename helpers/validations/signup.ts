@@ -41,8 +41,6 @@ export function notEmailExist(
 export const signupValidation = async (
   data: ValidateCredential,
 ) => {
-  const findEmail = await find("users", { email: data.email });
-
   return await validate(data, {
     email: [required, isEmail, notEmailExist(data.email)],
     password: [required, minLength(12)],
@@ -52,8 +50,7 @@ export const signupValidation = async (
     ],
   }, {
     messages: {
-      error_email: "The email address has already been registered!" +
-        JSON.stringify(findEmail),
+      error_email: "The email address has already been registered!",
       error_password: "Password and confirm password didn't matched!",
     },
   });

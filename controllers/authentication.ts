@@ -1,4 +1,3 @@
-import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.3.0/mod.ts";
 
 import { User } from "../models/User.ts";
@@ -12,14 +11,7 @@ import { find } from "../helpers/databaseMethods.ts";
 
 // import crypto from "crypto";
 
-const test: Array<number> = [];
-
-const env = await load();
-const {
-  COLLECTION,
-  DATABASE,
-  DATA_SOURCE,
-} = env;
+const test: Array<number | string> = [];
 
 export const postSignin = async ({
   request,
@@ -148,11 +140,13 @@ export const postSignup = async ({
     }
     test.push(3);
     const hashedPassword = await bcrypt.hash(password);
-    const newUser = new User(email.toLowerCase(), hashedPassword);
+    test.push(hashedPassword);
     test.push(4);
+    const newUser = new User(email.toLowerCase(), hashedPassword);
+    test.push(5);
 
     await newUser.save();
-    test.push(5);
+    test.push(6);
     response.body = { success: true, message: "Successfully signup!" };
   } catch (error) {
     response.body = {

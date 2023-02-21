@@ -1,6 +1,7 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
 import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 import {
+  postResetPassword,
   postSignin,
   postSignup,
   resetPassword,
@@ -48,11 +49,11 @@ const router = new Router();
 //   context.response.body = { message: "Deleted message!", messages: messages };
 // });
 
-// router.get("/signin", AuthController.getSignin);
-
 router.post("/signin", postSignin);
 
-router.post("/reset-password", resetPassword);
+router.post("/reset-password", postResetPassword);
+
+router.get("/reset-password/:token", resetPassword);
 
 router.post("/update-password", updatePassword);
 

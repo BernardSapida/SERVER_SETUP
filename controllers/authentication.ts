@@ -33,7 +33,7 @@ export const postSignin = async ({
   response.body = { success: true, message: "Successfully logged in!" };
 };
 
-export const resetPassword = async ({
+export const postResetPassword = async ({
   request,
   response,
 }: {
@@ -89,6 +89,21 @@ export const resetPassword = async ({
       message: error.toString(),
     };
   }
+};
+
+export const resetPassword = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  console.log("HERE:");
+  const token = await request.params.token;
+  response.body = {
+    success: true,
+    message: token,
+  };
 };
 
 export const updatePassword = async ({

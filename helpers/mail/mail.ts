@@ -13,7 +13,7 @@ export const sendMail = async (
 ) => {
   await client.connectTLS({
     hostname: "smtp.gmail.com",
-    port: 587,
+    port: 465,
     username: "burgerhub.service@gmail.com",
     password: APP_PASSWORD,
   });

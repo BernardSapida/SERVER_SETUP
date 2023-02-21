@@ -134,14 +134,14 @@ export const postSignup = async ({
     const data = await body.value;
     const { email, password } = data;
 
-    const [passes, errors] = await signupValidation(data);
+    // const [passes, errors] = await signupValidation(data);
 
-    if (!passes) {
-      return response.body = {
-        success: false,
-        errors: errors,
-      };
-    }
+    // if (!passes) {
+    //   return response.body = {
+    //     success: false,
+    //     errors: errors,
+    //   };
+    // }
 
     const hashedPassword = await bcrypt.hash(password);
     const newUser = new User(email.toLowerCase(), hashedPassword);
@@ -155,36 +155,3 @@ export const postSignup = async ({
     };
   }
 };
-
-// const postSignout = async (req: any, res: any, next: any) => {
-//   res.send({ message: "You are signed out" });
-// };
-
-// const sendMail = (
-//   email: string,
-//   subject = "Subject",
-//   text = "Hello World!",
-//   html: string,
-// ) => {
-//   const mailTransporter = nodemailer.createTransport({
-//     host: "smtp.gmail.com",
-//     port: 587,
-//     requireTLS: true,
-//     secure: true,
-//     service: "gmail",
-//     auth: {
-//       user: "burgerhub.service@gmail.com",
-//       pass: process.env.APP_PASSWORD,
-//     },
-//   });
-
-//   const data = {
-//     to: email,
-//     from: "burgerhub.service@gmail.com",
-//     subject: subject,
-//     text: text,
-//     html: html,
-//   };
-
-//   // mailTransporter.sendMail(data);
-// };

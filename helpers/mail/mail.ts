@@ -1,4 +1,4 @@
-import { SmtpClient } from "https://deno.land/x/smtp/mod.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 const env = await load();
 const { APP_PASSWORD } = env;

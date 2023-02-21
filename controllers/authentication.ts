@@ -3,7 +3,12 @@ import * as bcrypt from "https://deno.land/x/bcrypt@v0.3.0/mod.ts";
 import { SmtpClient } from "https://deno.land/x/smtp/mod.ts";
 
 import { User } from "../models/User.ts";
+import { signinValidation } from "../helpers/validations/signin.ts";
 import { signupValidation } from "../helpers/validations/signup.ts";
+import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
+import { find } from "../helpers/databaseMethods.ts";
+import { fetchApi } from "../helpers/database.ts";
+
 // import crypto from "crypto";
 // import User from "../models/User.ts";
 
@@ -14,25 +19,27 @@ const {
   DATA_SOURCE,
 } = env;
 
-// const postSignin = async (req: any, res: any, next: any) => {
-//   const { email, password } = req.body;
-//   const validationResults = validationResult(req);
+export const postSignin = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  const body = await request.body();
+  const data = await body.value;
 
-//   if (!validationResults.isEmpty()) {
-//     const error: string = validationResults.array()[0].msg;
+  const [passes, errors] = await signinValidation(data);
 
-//     return res.status(422).send({
-//       email: email,
-//       password: password,
-//       error: error,
-//     });
-//   }
+  if (!passes) {
+    return response.body = {
+      success: false,
+      errors: errors,
+    };
+  }
 
-//   // req.session.user = user;
-//   // req.session.isAuthenticated = true;
-//   // req.session.save(() => res.send({ message: 'Successfully logged in!' }));
-//   res.status(200).send({ message: "Successfully logged in!" });
-// };
+  response.body = { success: true, message: "Successfully logged in!" };
+};
 
 // const postResetPassword = (req: any, res: any, next: any) => {
 //   const { email } = req.body;
@@ -68,40 +75,42 @@ const {
 //   });
 // };
 
-// const postUpdatePassword = async (req: any, res: any, next: any) => {
-//   const userId = "63f20c3d2f0913bac94b1a59";
-//   const { newPassword, confirmPassword, passwordToken } = req.body;
-//   const validationResults = validationResult(req);
+export const updatePassword = async ({
+  request,
+  response,
+}: {
+  request: any;
+  response: any;
+}) => {
+  const body = await request.body();
+  const data = await body.value;
+  const { newPassword, passwordToken } = data;
+  const userId = "63f442b288d4013bd7aa6445";
 
-//   if (!validationResults.isEmpty()) {
-//     const error: string = validationResults.array()[0].msg;
+  const [passes, errors] = await updatePasswordValidation(data);
 
-//     return res.status(403).send({
-//       newPassword: newPassword,
-//       confirmPassword: confirmPassword,
-//       passwordToken: passwordToken,
-//       userId: userId,
-//       error: error,
-//     });
-//   }
+  if (!passes) {
+    return response.body = {
+      success: false,
+      errors: errors,
+    };
+  }
 
-//   const user = await User.findOne({
-//     // resetToken: passwordToken,
-//     // resetTokenExpiration: { $gt: Date.now() },
-//     _id: userId,
-//   });
+  const hashedPassword = await bcrypt.hash(newPassword);
 
-//   if (!user) res.status(403).send({ message: "User not found" });
+  const bodyInformation = {
+    filter: { "_id": userId },
+    update: {
+      "$set": { password: hashedPassword },
+    },
+  };
 
-//   if (newPassword == confirmPassword) {
-//     const hashedPassword = await bcrypt.hash(newPassword, 12);
-//     user.password = hashedPassword;
-//     // user.resetToken = undefined;
-//     // user.resetTokenExpiration = undefined;
-//     user.save();
-//     res.status(200).send({ message: "Password has been updated!" });
-//   }
-// };
+  const result = await fetchApi("POST", "updateOne", "users", bodyInformation);
+
+  console.log(await result);
+
+  response.body = { success: true, message: "Successfully updated password!" };
+};
 
 export const postSignup = async ({
   request,
@@ -112,7 +121,7 @@ export const postSignup = async ({
 }) => {
   const body = await request.body();
   const data = await body.value;
-  const { email, password, confirmPassword } = data;
+  const { email, password } = data;
 
   const [passes, errors] = await signupValidation(data);
 
@@ -125,7 +134,9 @@ export const postSignup = async ({
 
   const hashedPassword = await bcrypt.hash(password);
   const newUser = new User(email.toLowerCase(), hashedPassword);
-  console.log(await newUser.save());
+
+  await newUser.save();
+
   response.body = { success: true, message: "Successfully signup!" };
 };
 

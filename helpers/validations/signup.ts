@@ -1,3 +1,4 @@
+import { find } from "../../helpers/databaseMethods.ts";
 import {
   invalid,
   isEmail,
@@ -18,11 +19,21 @@ export function isPasswordMatched(
   password: string,
   confirmPassword: string,
 ): Rule {
-  return async function uniqueRule(value: any): Promise<Validity> {
+  return function uniqueRule() {
     if (password !== confirmPassword) {
-      return invalid("isPasswordMatched", {
-        confirmPassword: "Password and confirm password didn't matched!",
-      });
+      return invalid("error_password");
+    }
+  };
+}
+
+export function notEmailExist(
+  email: string,
+): Rule {
+  return async function uniqueRule(): Promise<Validity> {
+    const findEmail = await find("users", { email: email });
+
+    if (findEmail.data.documents.length > 0) {
+      return invalid("error_email");
     }
   };
 }
@@ -31,11 +42,16 @@ export const signupValidation = async (
   data: ValidateCredential,
 ) => {
   return await validate(data, {
-    email: [required, isEmail],
+    email: [required, isEmail, notEmailExist(data.email)],
     password: [required, minLength(12)],
     confirmPassword: [
       required,
       isPasswordMatched(data.password, data.confirmPassword),
     ],
+  }, {
+    messages: {
+      error_email: "The email address has already been registered!",
+      error_password: "Password and confirm password didn't matched!",
+    },
   });
 };

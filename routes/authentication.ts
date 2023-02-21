@@ -1,12 +1,10 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
 import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
-import { postSignup } from "../controllers/authentication.ts";
-// import validate from "../validation/validation_processor";
-
-interface Message {
-  id: string;
-  text: string;
-}
+import {
+  postSignin,
+  postSignup,
+  updatePassword,
+} from "../controllers/authentication.ts";
 
 const router = new Router();
 
@@ -51,15 +49,11 @@ const router = new Router();
 
 // router.get("/signin", AuthController.getSignin);
 
-// router.post("/signin", validate.signin(), AuthController.postSignin);
+router.post("/signin", postSignin);
 
 // router.post("/reset-password", AuthController.postResetPassword);
 
-// router.put(
-//   "/update-password",
-//   validate.updatePassword(),
-//   AuthController.postUpdatePassword,
-// );
+router.post("/update-password", updatePassword);
 
 router.post("/signup", postSignup);
 

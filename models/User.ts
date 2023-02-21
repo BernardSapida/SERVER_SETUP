@@ -1,25 +1,5 @@
-import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
-import { BASE_URI, POST_OPTIONS } from "../helpers/database.ts";
-
-interface RequestBody {
-  dataSource: string;
-  database: string;
-  collection: string;
-  document?: Record<string, unknown>;
-}
-
-const env = await load();
-const {
-  COLLECTION,
-  DATABASE,
-  DATA_SOURCE,
-} = env;
-
-const requestBody: RequestBody = {
-  dataSource: DATA_SOURCE,
-  database: DATABASE,
-  collection: "users",
-};
+import { fetchApi } from "../helpers/database.ts";
+import { response } from "../helpers/databaseMethods.ts";
 
 export class User {
   email: string;
@@ -32,35 +12,24 @@ export class User {
 
   async save() {
     try {
-      const URI = `${BASE_URI}/action/insertOne`;
-
-      POST_OPTIONS.body = JSON.stringify({
-        ...requestBody,
+      const document = {
         document: {
           email: this.email,
           password: this.password,
         },
-      });
-
-      const dataResponse = await fetch(URI, POST_OPTIONS);
-      const insertedId = await dataResponse.json();
-
-      return {
-        status: 201,
-        body: {
-          success: true,
-          data: {
-            insertedId: insertedId,
-            email: this.email,
-            password: this.password,
-          },
-        },
       };
+
+      const result = await fetchApi("POST", "insertOne", "users", document);
+
+      if (result.status === 403) {
+        return response(false, result.data);
+      }
+
+      const insertedId = await result.data;
+
+      return response(true, insertedId);
     } catch (error) {
-      return {
-        success: false,
-        msg: error.toString(),
-      };
+      return response(true, error);
     }
   }
 }

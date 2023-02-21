@@ -1,5 +1,4 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
-import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 import {
   postResetPassword,
   postSignin,
@@ -24,7 +23,5 @@ router.post("/update-password", updatePassword);
 router.post("/signup", postSignup);
 
 // router.post("/signout", AuthController.postSignout);
-
-// export default router;
 
 export default router;

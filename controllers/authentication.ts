@@ -58,7 +58,7 @@ export const postSignin = async (context: any) => {
       success: true,
       authToken: jwtToken,
       expiration: expiration,
-      message: "Successfully logged in!",
+      message: "Successfully logged in",
     };
   } catch (error) {
     response.body = {

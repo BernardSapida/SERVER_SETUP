@@ -1,4 +1,5 @@
 import { Router } from "https://deno.land/x/oak/mod.ts";
+import { verifyToken } from "../middleware/authentication.ts";
 import {
   postResetPassword,
   postSignin,
@@ -7,8 +8,11 @@ import {
   resetPassword,
   updatePassword,
 } from "../controllers/authentication.ts";
+import { getMessage } from "../controllers/feed.ts";
 
 const router = new Router();
+
+router.get("/message", verifyToken, getMessage);
 
 router.post("/signin", postSignin);
 

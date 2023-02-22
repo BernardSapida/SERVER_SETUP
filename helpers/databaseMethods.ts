@@ -2,15 +2,15 @@ import { MongoAPI } from "./database.ts";
 
 export const find = async (
   collection: string,
-  options: Record<string, unknown>,
+  filter: Record<string, unknown>,
 ) => {
   try {
-    const filter = {
+    const options = {
       filter: {
-        ...options,
+        ...filter,
       },
     };
-    const response = await MongoAPI("POST", "find", collection, filter);
+    const response = await MongoAPI("POST", "find", collection, options);
 
     if (response.status === 403) {
       return response;

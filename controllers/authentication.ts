@@ -1,47 +1,76 @@
+import { create, getNumericDate } from "https://deno.land/x/djwt@v2.8/mod.ts";
 import { hash } from "https://deno.land/x/scrypt@v4.2.1/mod.ts";
-import { User } from "../models/User.ts";
+import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 
+import { User } from "../models/User.ts";
 import { signinValidation } from "../helpers/validations/signin.ts";
 import { signupValidation } from "../helpers/validations/signup.ts";
 import { updatePasswordValidation } from "../helpers/validations/updatePassword.ts";
 import { resetPasswordValidation } from "../helpers/validations/resetPassword.ts";
-import { load } from "https://deno.land/std@0.177.0/dotenv/mod.ts";
 
 import { MongoAPI } from "../helpers/database.ts";
 import { sendMail } from "../helpers/mail/mail.ts";
 import { find } from "../helpers/databaseMethods.ts";
 
-// import crypto from "crypto";
+const env = await load();
+const { WEB_KEY } = env;
 
-export const postSignin = async ({
-  request,
-  response,
-}: {
-  request: any;
-  response: any;
-}) => {
-  const body = await request.body();
-  const data = await body.value;
+export const postSignin = async (context: any) => {
+  const { request, response }: { request: any; response: any } = context;
 
-  const [passes, errors] = await signinValidation(data);
+  try {
+    const body = await request.body();
+    const data = await body.value;
+    const encoder = new TextEncoder();
+    const jsonWebKey = encoder.encode(WEB_KEY);
 
-  if (!passes) {
-    return response.body = {
+    const [passes, errors] = await signinValidation(data);
+
+    if (!passes) {
+      return response.body = {
+        success: false,
+        errors: errors,
+      };
+    }
+
+    const user = await find("users", { email: data.email });
+
+    const cryptoKey = await crypto.subtle.importKey(
+      "raw",
+      jsonWebKey,
+      { name: "HMAC", hash: "SHA-512" },
+      true,
+      ["sign", "verify"],
+    );
+
+    const jwtToken = await create(
+      { alg: "HS512", typ: "JWT" },
+      {
+        _id: user.data.documents._id,
+        email: user.data.documents.email,
+        exp: getNumericDate(60),
+      },
+      cryptoKey,
+    );
+    const expiration = 60;
+
+    response.body = {
+      success: true,
+      authToken: jwtToken,
+      expiration: expiration,
+      message: "Successfully logged in!",
+    };
+  } catch (error) {
+    response.body = {
       success: false,
-      errors: errors,
+      error: error.message,
     };
   }
-
-  response.body = { success: true, message: "Successfully logged in!" };
 };
 
-export const requestResetPassword = async ({
-  request,
-  response,
-}: {
-  request: any;
-  response: any;
-}) => {
+export const requestResetPassword = async (
+  { request, response }: { request: any; response: any },
+) => {
   try {
     const body = await request.body();
     const data = await body.value;

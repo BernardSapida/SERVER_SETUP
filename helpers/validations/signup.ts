@@ -50,6 +50,7 @@ export const signupValidation = async (
     ],
   }, {
     messages: {
+      "password.minLength": "Password must be at least 12 characters long.",
       error_email: "The email address has already been registered!",
       error_password: "Password and confirm password didn't matched!",
     },

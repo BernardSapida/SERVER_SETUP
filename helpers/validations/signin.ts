@@ -57,6 +57,7 @@ export const signinValidation = async (
   }, {
     messages: {
       validEmail: "The email address didn't exist!",
+      "password.minLength": "Password is incorrect!",
       validPassword: "Password is incorrect!",
     },
   });

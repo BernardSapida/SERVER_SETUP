@@ -7,7 +7,7 @@ import {
   Rule,
   validate,
   Validity,
-} from "https://deno.land/x/validasaur/mod.ts";
+} from "https://deno.land/x/validasaur@v0.15.0/mod.ts";
 import { verify } from "https://deno.land/x/scrypt@v4.2.1/mod.ts";
 
 interface ValidateCredential {

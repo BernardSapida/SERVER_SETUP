@@ -7,7 +7,7 @@ import {
   Rule,
   validate,
   Validity,
-} from "https://deno.land/x/validasaur/mod.ts";
+} from "https://deno.land/x/validasaur@v0.15.0/mod.ts";
 
 interface ValidateCredential {
   email: string;

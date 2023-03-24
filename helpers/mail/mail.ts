@@ -11,20 +11,20 @@ export const sendMail = async (
   content: string,
   html: string,
 ) => {
-  await client.connectTLS({
-    hostname: "smtp.gmail.com",
-    port: 465,
-    username: "burgerhub.service@gmail.com",
-    password: APP_PASSWORD,
-  });
+  // await client.connectTLS({
+  //   hostname: "smtp.gmail.com",
+  //   port: 465,
+  //   username: "burgerhub.service@gmail.com",
+  //   password: APP_PASSWORD,
+  // });
 
-  await client.send({
-    from: "burgerhub.service@gmail.com",
-    to: email,
-    subject: subject, // Mail Title
-    content: content,
-    html: html,
-  });
+  // await client.send({
+  //   from: "burgerhub.service@gmail.com",
+  //   to: email,
+  //   subject: subject, // Mail Title
+  //   content: content,
+  //   html: html,
+  // });
 
-  await client.close();
+  // await client.close();
 };
